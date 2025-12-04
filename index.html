@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>King of the Hill - HIGHER</title>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #1a1b23;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .king-title {
+            font-family: 'Anton', sans-serif; 
+            font-size: 16vmin; 
+            
+            background: linear-gradient(to bottom, #ffd700 40%, #ff8c00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            
+            filter: drop-shadow(0.5vmin 0.5vmin 0px #8b4500) 
+                    drop-shadow(1vmin 1vmin 0px #5e2f00);
+            
+            margin-bottom: 5vmin;
+            letter-spacing: 0.05em;
+            text-align: center;
+            line-height: 1;
+            transform: skew(-5deg); 
+        }
+
+        .content-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5vmin;
+            width: 90%;
+        }
+
+        .token-image {
+            width: 30vmin;
+            height: 30vmin;
+            background-color: #4a9c2d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 2vmin;
+            flex-shrink: 0;
+        }
+
+        .token-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2vmin;
+        }
+
+        .arrow-icon {
+            color: white;
+            font-size: 20vmin;
+            font-weight: bold;
+        }
+
+        .details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vmin;
+            font-size: 4vmin;
+        }
+
+        .creator-line {
+            display: flex;
+            align-items: center;
+            gap: 1.5vmin;
+            color: #b0b3b8;
+            font-size: 3.5vmin;
+        }
+
+        .pepe-icon {
+            width: 6vmin;
+            height: 6vmin;
+            border-radius: 50%;
+        }
+
+        .username {
+            color: #ffffff;
+            font-weight: bold;
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .market-cap-line {
+            color: #4a9c2d;
+            font-weight: bold;
+            font-size: 4.5vmin;
+        }
+        
+        .market-cap-value {
+            color: #4a9c2d;
+            text-shadow: none;
+        }
+
+        .badge {
+            margin-left: 1vmin;
+            font-size: 4.5vmin;
+        }
+
+        .replies-line {
+            color: #b0b3b8;
+            font-size: 3.5vmin;
+        }
+
+        .replies-value {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .token-name-line {
+            font-size: 6vmin;
+            font-weight: bold;
+            margin-top: 1vmin;
+            line-height: 1;
+        }
+
+        .ticker {
+            color: #b0b3b8;
+            font-weight: normal;
+            font-size: 0.8em; 
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            margin-top: 1vmin;
+            width: 100%;
+        }
+
+        .progress-label {
+            color: #b0b3b8;
+            font-size: 3vmin;
+            margin-bottom: 0.5vmin;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-percentage {
+            color: #4a9c2d;
+            font-weight: bold;
+            font-size: 3.5vmin;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 3vmin;
+            background-color: #2a2b35;
+            border-radius: 1.5vmin;
+            overflow: hidden;
+            position: relative;
+            border: 0.2vmin solid #3a3b45;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9c2d 0%, #5cb33a 50%, #6dd147 100%);
+            border-radius: 1.5vmin;
+            transition: width 0.5s ease;
+            position: relative;
+            box-shadow: 0 0 1vmin rgba(74, 156, 45, 0.5);
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-status {
+            color: #b0b3b8;
+            font-size: 2.5vmin;
+            margin-top: 0.5vmin;
+            text-align: center;
+        }
+
+        .migrated-badge {
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 0 0 1vmin rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Hide utilities */
+        #tokenMint, #statusLog, #solPriceDisplay, #priceDisplay { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="king-title">king of the hill</div>
+
+    <div class="content-container">
+        <div class="token-image">
+            <span class="arrow-icon">↑</span>
+        </div>
+        <div class="details">
+            <div class="creator-line">
+                Created by 
+                <img src="" alt="Creator" class="pepe-icon"> 
+                <span class="username">...</span>
+            </div>
+            <div class="market-cap-line">
+                market cap: <span id="mcapDisplay" class="market-cap-value">Loading...</span> <span class="badge">[badge: 👑]</span>
+            </div>
+            <div class="replies-line">
+                replies: <span class="replies-value">...</span>
+            </div>
+            <div class="token-name-line">
+                ... <span class="ticker">...</span>
+            </div>
+
+            <!-- Progress Bar Section -->
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Bonding Curve Progress</span>
+                    <span class="progress-percentage" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+                <div class="progress-status" id="progressStatus">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <input type="text" id="tokenMint">
+    <div id="priceDisplay"></div>
+    <div id="solPriceDisplay"></div>
+    <div id="statusLog"></div>
+
+    <script>
+        // ==================================================================
+        // 👇 CONFIGURATION
+        // ==================================================================
+        const SETTINGS = {
+            tokenMint: "Hoi9Lo8s2PP7EM9mv9bZjQ3aSB7ijyS238sTqQjbpump",
+            
+            // Your Helius/Alchemy URL
+            rpcUrl: "https://mainnet.helius-rpc.com/?api-key=9a8da134-4626-4efc-99ad-ada51ac9e844",
+
+            tokenName: "higher",
+            ticker: "HIGHER",
+            
+            creatorName: "6P9Pw",
+            repliesCount: "43", 
+
+            tokenImage: "B9wWj826HvW6GnZFYVMTkxV7pfaGqpxb3Pnp28APGgum",
+            creatorImage: "https://images.pump.fun/coin-image/Hoi9Lo8s2PP7EM9mv9bZjQ3aSB7ijyS238sTqQjbpump?variant=86x86&ipfs=bafkreidaw4da7zoejusbcalqh6kxktr7c3despwtos4uz5seuyyszxotuu&src=https%3A%2F%2Fipfs.io%2Fipfs%2Fbafkreidaw4da7zoejusbcalqh6kxktr7c3despwtos4uz5seuyyszxotuu"
+        };
+        // ==================================================================
+
+        const { Connection, PublicKey } = solanaWeb3;
+        const PUMP_PROGRAM = new PublicKey("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P");
+        
+        // Bonding curve constants (with 6 decimals)
+        const INITIAL_REAL_TOKEN_RESERVES = 793_100_000_000_000n; // 793.1M tokens (with 6 decimals)
+
+        // --- Apply Settings ---
+        document.getElementById('tokenMint').value = SETTINGS.tokenMint;
+        document.querySelector('.username').innerText = SETTINGS.creatorName;
+        document.querySelector('.token-name-line').innerHTML = `${SETTINGS.tokenName} <span class="ticker">[ticker: ${SETTINGS.ticker}]</span>`;
+        document.querySelector('.replies-value').innerText = SETTINGS.repliesCount;
+        document.querySelector('.pepe-icon').src = SETTINGS.creatorImage;
+
+        if (SETTINGS.tokenImage) {
+            const imgContainer = document.querySelector('.token-image');
+            imgContainer.innerHTML = `<img src="${SETTINGS.tokenImage}">`;
+            imgContainer.style.background = "transparent";
+            imgContainer.style.border = "none";
+        }
+
+        // --- Data Logic ---
+        const connection = new Connection(SETTINGS.rpcUrl.includes("YOUR") ? "https://api.mainnet-beta.solana.com" : SETTINGS.rpcUrl, "confirmed");
+        let solPrice = 200.0; // Updated fallback price
+
+        async function fetchSolPrice() {
+            try {
+                const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
+                const data = await response.json();
+                if (data && data.solana && data.solana.usd) {
+                    solPrice = data.solana.usd;
+                    console.log('SOL Price updated:', solPrice);
+                }
+            } catch (err) { 
+                console.log("Using fallback SOL price:", solPrice); 
+            }
+        }
+
+        async function updateMarketCap() {
+            const mcapDisplay = document.getElementById("mcapDisplay");
+            const progressBar = document.getElementById("progressBar");
+            const progressPercent = document.getElementById("progressPercent");
+            const progressStatus = document.getElementById("progressStatus");
+
+            try {
+                const mintPubkey = new PublicKey(SETTINGS.tokenMint);
+                const seed = new TextEncoder().encode("bonding-curve");
+                const [bondingCurvePda] = await PublicKey.findProgramAddress([seed, mintPubkey.toBytes()], PUMP_PROGRAM);
+                const accountInfo = await connection.getAccountInfo(bondingCurvePda);
+
+                if (!accountInfo) { 
+                    mcapDisplay.innerText = "Migrated";
+                    progressBar.style.width = "100%";
+                    progressPercent.innerHTML = '<span class="migrated-badge">✓ MIGRATED</span>';
+                    progressStatus.innerHTML = '<span class="migrated-badge">Token has graduated to Raydium! 🚀</span>';
+                    return;
+                }
+                
+                const buffer = accountInfo.data;
+                const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+                const virtualTokenReserves = view.getBigUint64(8, true);
+                const virtualSolReserves = view.getBigUint64(16, true);
+                const realTokenReserves = view.getBigUint64(24, true);
+                const realSolReserves = view.getBigUint64(32, true);
+                
+                // Check if bonding curve is complete (byte offset 48, bool)
+                const isComplete = view.getUint8(48) === 1;
+                
+                if (isComplete || virtualTokenReserves === 0n || realTokenReserves === 0n) {
+                    mcapDisplay.innerText = "Migrated";
+                    progressBar.style.width = "100%";
+                    progressPercent.innerHTML = '<span class="migrated-badge">✓ MIGRATED</span>';
+                    progressStatus.innerHTML = '<span class="migrated-badge">Token has graduated to PumpSwap! 🚀</span>';
+                    return;
+                }
+                
+                if (virtualTokenReserves === 0n) { 
+                    mcapDisplay.innerText = "Migrated";
+                    progressBar.style.width = "100%";
+                    progressPercent.innerHTML = '<span class="migrated-badge">✓ MIGRATED</span>';
+                    progressStatus.innerHTML = '<span class="migrated-badge">Token has graduated to Raydium! 🚀</span>';
+                    return;
+                }
+
+                // Calculate market cap
+                const vToken = Number(virtualTokenReserves) / 1_000_000;
+                const vSol = Number(virtualSolReserves) / 1_000_000_000;
+                const priceInSol = vSol / vToken;
+                const priceInUsd = priceInSol * solPrice;
+                const marketCap = priceInUsd * 1_000_000_000; 
+
+                // Debug logging
+                console.log('Market Cap Debug:', {
+                    virtualTokenReserves: vToken.toFixed(2),
+                    virtualSolReserves: vSol.toFixed(4),
+                    priceInSol: priceInSol.toFixed(10),
+                    priceInUsd: priceInUsd.toFixed(10),
+                    solPrice: solPrice,
+                    marketCap: marketCap.toFixed(2),
+                    currentSOL: (Number(realSolReserves) / 1_000_000_000).toFixed(3),
+                    solNeeded: (85 - Number(realSolReserves) / 1_000_000_000).toFixed(3),
+                    dollarToGraduate: ((85 - Number(realSolReserves) / 1_000_000_000) * solPrice).toFixed(2)
+                });
+
+                let formattedMcap = "";
+                if (marketCap >= 1_000_000_000) formattedMcap = (marketCap / 1_000_000_000).toFixed(2) + "B";
+                else if (marketCap >= 1_000_000) formattedMcap = (marketCap / 1_000_000).toFixed(2) + "M";
+                else if (marketCap >= 1_000) formattedMcap = (marketCap / 1_000).toFixed(2) + "K";
+                else formattedMcap = marketCap.toFixed(2);
+                
+                mcapDisplay.innerText = formattedMcap;
+
+                // Calculate bonding curve progress (GitHub gist formula)
+                // Formula: progress = 1 - (realTokenReserves / INITIAL_REAL_TOKEN_RESERVES)
+                const bondingProgress = realTokenReserves >= INITIAL_REAL_TOKEN_RESERVES ? 0 : 
+                    (1 - (Number(realTokenReserves * 10000n / INITIAL_REAL_TOKEN_RESERVES) / 10000));
+                const percentage = bondingProgress * 100;
+                
+                progressBar.style.width = percentage + "%";
+                progressPercent.innerText = percentage.toFixed(1) + "%";
+                
+                // Calculate $ to graduate based on market cap needed to complete bonding curve
+                // Graduation happens when bonding curve completes (all 793.1M tokens sold)
+                // This happens at approximately 85 SOL raised, which at completion gives ~$90k market cap
+                const GRADUATION_MARKET_CAP = 90000; // $90k market cap at graduation
+                const dollarToGraduate = Math.max(GRADUATION_MARKET_CAP - marketCap, 0);
+                
+                const currentSol = Number(realSolReserves) / 1_000_000_000;
+                progressStatus.innerText = `${currentSol.toFixed(3)} SOL in bonding curve$${Math.floor(dollarToGraduate).toLocaleString('en-US')} to graduate`;
+
+            } catch (err) { 
+                console.error(err); 
+                mcapDisplay.innerText = "Error";
+                progressStatus.innerText = "Unable to load progress data";
+            }
+        }
+
+        fetchSolPrice();
+        updateMarketCap();
+        setInterval(updateMarketCap, 1000);
+        setInterval(fetchSolPrice, 60000);
+    </script>
+</body>
+</html>
