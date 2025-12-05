@@ -27,16 +27,18 @@
 
         .king-title {
             font-family: 'Anton', sans-serif; 
-            font-size: 16vmin; 
+            /* Reduced from 16vmin to 10vmin */
+            font-size: 10vmin; 
             
             background: linear-gradient(to bottom, #ffd700 40%, #ff8c00 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             
-            filter: drop-shadow(0.5vmin 0.5vmin 0px #8b4500) 
-                    drop-shadow(1vmin 1vmin 0px #5e2f00);
+            filter: drop-shadow(0.3vmin 0.3vmin 0px #8b4500) 
+                    drop-shadow(0.6vmin 0.6vmin 0px #5e2f00);
             
-            margin-bottom: 5vmin;
+            /* Reduced margin */
+            margin-bottom: 3vmin;
             letter-spacing: 0.05em;
             text-align: center;
             line-height: 1;
@@ -47,18 +49,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5vmin;
-            width: 90%;
+            /* Reduced gap */
+            gap: 3vmin;
+            width: 80%;
         }
 
         .token-image {
-            width: 30vmin;
-            height: 30vmin;
+            /* Reduced from 30vmin to 18vmin */
+            width: 18vmin;
+            height: 18vmin;
             background-color: #4a9c2d;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 2vmin;
+            border-radius: 1.5vmin;
             flex-shrink: 0;
         }
 
@@ -66,33 +70,36 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 2vmin;
+            border-radius: 1.5vmin;
         }
 
         .arrow-icon {
             color: white;
-            font-size: 20vmin;
+            /* Reduced from 20vmin to 10vmin */
+            font-size: 10vmin;
             font-weight: bold;
         }
 
         .details {
             display: flex;
             flex-direction: column;
-            gap: 1.5vmin;
-            font-size: 4vmin;
+            gap: 1vmin;
+            font-size: 2.5vmin;
         }
 
         .creator-line {
             display: flex;
             align-items: center;
-            gap: 1.5vmin;
+            gap: 1vmin;
             color: #b0b3b8;
-            font-size: 3.5vmin;
+            /* Reduced font size */
+            font-size: 2.2vmin;
         }
 
         .pepe-icon {
-            width: 6vmin;
-            height: 6vmin;
+            /* Reduced icon size */
+            width: 4vmin;
+            height: 4vmin;
             border-radius: 50%;
         }
 
@@ -106,7 +113,8 @@
         .market-cap-line {
             color: #4a9c2d;
             font-weight: bold;
-            font-size: 4.5vmin;
+            /* Reduced font size */
+            font-size: 3vmin;
         }
         
         .market-cap-value {
@@ -115,13 +123,13 @@
         }
 
         .badge {
-            margin-left: 1vmin;
-            font-size: 4.5vmin;
+            margin-left: 0.5vmin;
+            font-size: 3vmin;
         }
 
         .replies-line {
             color: #b0b3b8;
-            font-size: 3.5vmin;
+            font-size: 2.2vmin;
         }
 
         .replies-value {
@@ -130,9 +138,10 @@
         }
 
         .token-name-line {
-            font-size: 6vmin;
+            /* Reduced from 6vmin to 4vmin */
+            font-size: 4vmin;
             font-weight: bold;
-            margin-top: 1vmin;
+            margin-top: 0.5vmin;
             line-height: 1;
         }
 
@@ -146,12 +155,14 @@
         .progress-container {
             margin-top: 1vmin;
             width: 100%;
+            /* Limit width slightly for cleaner look */
+            max-width: 40vmin;
         }
 
         .progress-label {
             color: #b0b3b8;
-            font-size: 3vmin;
-            margin-bottom: 0.5vmin;
+            font-size: 2vmin;
+            margin-bottom: 0.3vmin;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -160,26 +171,27 @@
         .progress-percentage {
             color: #4a9c2d;
             font-weight: bold;
-            font-size: 3.5vmin;
+            font-size: 2.2vmin;
         }
 
         .progress-bar-bg {
             width: 100%;
-            height: 3vmin;
+            /* Reduced height */
+            height: 1.8vmin;
             background-color: #2a2b35;
-            border-radius: 1.5vmin;
+            border-radius: 1vmin;
             overflow: hidden;
             position: relative;
-            border: 0.2vmin solid #3a3b45;
+            border: 0.1vmin solid #3a3b45;
         }
 
         .progress-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, #4a9c2d 0%, #5cb33a 50%, #6dd147 100%);
-            border-radius: 1.5vmin;
+            border-radius: 1vmin;
             transition: width 0.5s ease;
             position: relative;
-            box-shadow: 0 0 1vmin rgba(74, 156, 45, 0.5);
+            box-shadow: 0 0 0.5vmin rgba(74, 156, 45, 0.5);
         }
 
         .progress-bar-fill::after {
@@ -203,7 +215,7 @@
 
         .progress-status {
             color: #b0b3b8;
-            font-size: 2.5vmin;
+            font-size: 1.8vmin;
             margin-top: 0.5vmin;
             text-align: center;
         }
@@ -211,7 +223,7 @@
         .migrated-badge {
             color: #ffd700;
             font-weight: bold;
-            text-shadow: 0 0 1vmin rgba(255, 215, 0, 0.5);
+            text-shadow: 0 0 0.5vmin rgba(255, 215, 0, 0.5);
         }
         
         /* Hide utilities */
@@ -242,7 +254,6 @@
                 ... <span class="ticker">...</span>
             </div>
 
-            <!-- Progress Bar Section -->
             <div class="progress-container">
                 <div class="progress-label">
                     <span>Bonding Curve Progress</span>
@@ -266,7 +277,7 @@
         // 👇 CONFIGURATION
         // ==================================================================
         const SETTINGS = {
-            tokenMint: "Hoi9Lo8s2PP7EM9mv9bZjQ3aSB7ijyS238sTqQjbpump",
+            tokenMint: "ydDccyq66xKtfqn5bsRpfFXz4WeF4fh3bgQBx1npump",
             
             // Your Helius/Alchemy URL
             rpcUrl: "https://mainnet.helius-rpc.com/?api-key=9a8da134-4626-4efc-99ad-ada51ac9e844",
@@ -274,11 +285,11 @@
             tokenName: "higher",
             ticker: "HIGHER",
             
-            creatorName: "B9wWj826HvW6GnZFYVMTkxV7pfaGqpxb3Pnp28APGgum",
+            creatorName: "6P9Pw",
             repliesCount: "43", 
 
-            tokenImage: "https://images.pump.fun/coin-image/Hoi9Lo8s2PP7EM9mv9bZjQ3aSB7ijyS238sTqQjbpump?variant=86x86&ipfs=bafkreidaw4da7zoejusbcalqh6kxktr7c3despwtos4uz5seuyyszxotuu&src=https%3A%2F%2Fipfs.io%2Fipfs%2Fbafkreidaw4da7zoejusbcalqh6kxktr7c3despwtos4uz5seuyyszxotuu",
-            creatorImage: "https://images.pump.fun/coin-image/Hoi9Lo8s2PP7EM9mv9bZjQ3aSB7ijyS238sTqQjbpump?variant=86x86&ipfs=bafkreidaw4da7zoejusbcalqh6kxktr7c3despwtos4uz5seuyyszxotuu&src=https%3A%2F%2Fipfs.io%2Fipfs%2Fbafkreidaw4da7zoejusbcalqh6kxktr7c3despwtos4uz5seuyyszxotuu"
+            tokenImage: "https://images.pump.fun/coin-image/BPhNJnsEvyZQAhLbfSGbE82hLdxyd5USB6BSwaYWpump?variant=600x600&ipfs=bafybeifg6slgfuxr5f6kbmzviwyrdhf2fnxbtt2jxknosq6lqgfnxwpiay&src=https%3A%2F%2Fpump.mypinata.cloud%2Fipfs%2Fbafybeifg6slgfuxr5f6kbmzviwyrdhf2fnxbtt2jxknosq6lqgfnxwpiay",
+            creatorImage: "https://pump.mypinata.cloud/ipfs/QmeSzchzEPqCU1jwTnsipwcBAeH7S4bmVvFGfF65iA1BY1?img-width=16&img-dpr=2&img-onerror=redirect"
         };
         // ==================================================================
 
@@ -409,7 +420,7 @@
                 const dollarToGraduate = Math.max(GRADUATION_MARKET_CAP - marketCap, 0);
                 
                 const currentSol = Number(realSolReserves) / 1_000_000_000;
-                progressStatus.innerText = `${currentSol.toFixed(3)} SOL in bonding curve$${Math.floor(dollarToGraduate).toLocaleString('en-US')} to graduate`;
+                progressStatus.innerText = `${currentSol.toFixed(3)} SOL in bonding curve • $${Math.floor(dollarToGraduate).toLocaleString('en-US')} to graduate`;
 
             } catch (err) { 
                 console.error(err); 
