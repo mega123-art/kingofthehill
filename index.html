@@ -93,7 +93,7 @@
             border-radius: 50%;
         }
 
-        /* --- NEW COPY BUTTON STYLES --- */
+        /* --- COPY BUTTON STYLES --- */
         .address-pill {
             display: flex;
             align-items: center;
@@ -103,7 +103,7 @@
             border-radius: 0.5vmin;
             cursor: pointer;
             transition: background-color 0.2s;
-            position: relative; /* For tooltip positioning */
+            position: relative; 
             border: 1px solid #3a3b45;
         }
 
@@ -114,7 +114,7 @@
         .username {
             color: #ffffff;
             font-weight: bold;
-            font-family: monospace; /* Monospace looks better for addresses */
+            font-family: monospace; 
             font-size: 2vmin;
         }
 
@@ -133,7 +133,7 @@
             padding: 0.5vmin 1vmin;
             position: absolute;
             z-index: 1;
-            bottom: 125%; /* Position above the button */
+            bottom: 125%; 
             left: 50%;
             transform: translateX(-50%);
             opacity: 0;
@@ -154,13 +154,9 @@
             border-color: #4a9c2d transparent transparent transparent;
         }
 
-        .address-pill:active .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-        
+        .address-pill:active .tooltip,
         .address-pill.copied .tooltip {
-             visibility: visible;
+            visibility: visible;
             opacity: 1;
         }
         /* --------------------------- */
@@ -292,6 +288,7 @@
             <div class="creator-line">
                 Created by 
                 <img src="" alt="Creator" class="pepe-icon"> 
+                
                 <div class="address-pill" onclick="copyAddress()">
                     <span class="username" id="creatorAddressDisplay">...</span>
                     <svg class="copy-icon-svg" viewBox="0 0 24 24">
@@ -333,10 +330,10 @@
         // 👇 CONFIGURATION
         // ==================================================================
         const SETTINGS = {
-            tokenMint: "Nks7XP6RE6a4tmNsUaUoLNUyrJKUvmV1DPJQZp3pump",
+            tokenMint: "72SYXzxThqtmvoJez8qFC5XZHJX1Gryirs5zYiW2pump",
             
-            // Your Helius/Alchemy URL
-            rpcUrl: "https://mainnet.helius-rpc.com/?api-key=464c3463-d991-4503-b3ea-bbc25fc1f103",
+            // Your Helius/Alchemy URL (Required for blockchain data)
+            rpcUrl: "https://mainnet.helius-rpc.com/?api-key=9a8da134-4626-4efc-99ad-ada51ac9e844",
 
             tokenName: "higher",
             ticker: "HIGHER",
@@ -358,7 +355,6 @@
         // --- Apply Settings & Format Address ---
         document.getElementById('tokenMint').value = SETTINGS.tokenMint;
         
-        // NEW: Format address to "Start...End"
         const fullAddress = SETTINGS.creatorName;
         const truncatedAddress = fullAddress.slice(0, 6) + '...' + fullAddress.slice(-4);
         document.getElementById('creatorAddressDisplay').innerText = truncatedAddress;
@@ -374,13 +370,12 @@
             imgContainer.style.border = "none";
         }
 
-        // --- NEW: Copy Functionality ---
+        // --- Copy Functionality ---
         function copyAddress() {
             navigator.clipboard.writeText(SETTINGS.creatorName).then(() => {
                 const pill = document.querySelector('.address-pill');
                 pill.classList.add('copied');
                 
-                // Remove the class after animation to allow re-triggering
                 setTimeout(() => {
                     pill.classList.remove('copied');
                 }, 1500);
@@ -391,7 +386,7 @@
 
         // --- Data Logic ---
         const connection = new Connection(SETTINGS.rpcUrl.includes("YOUR") ? "https://api.mainnet-beta.solana.com" : SETTINGS.rpcUrl, "confirmed");
-        let solPrice = 200.0; 
+        let solPrice = 200.0; // Fallback
 
         async function fetchSolPrice() {
             try {
@@ -473,7 +468,11 @@
                 progressBar.style.width = percentage + "%";
                 progressPercent.innerText = percentage.toFixed(1) + "%";
                 
-                const GRADUATION_MARKET_CAP = 90000; 
+                // === CORRECTED GRADUATION TARGET ===
+                // Pump.fun graduation market cap is typically around $60k - $70k (depending on SOL price).
+                // Previously this was 90,000, which caused the mismatch. 65,000 is much closer to live data.
+                const GRADUATION_MARKET_CAP = 65000; 
+
                 const dollarToGraduate = Math.max(GRADUATION_MARKET_CAP - marketCap, 0);
                 
                 const currentSol = Number(realSolReserves) / 1_000_000_000;
