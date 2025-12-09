@@ -27,17 +27,12 @@
 
         .king-title {
             font-family: 'Anton', sans-serif; 
-            /* Reduced from 16vmin to 10vmin */
             font-size: 10vmin; 
-            
             background: linear-gradient(to bottom, #ffd700 40%, #ff8c00 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            
             filter: drop-shadow(0.3vmin 0.3vmin 0px #8b4500) 
                     drop-shadow(0.6vmin 0.6vmin 0px #5e2f00);
-            
-            /* Reduced margin */
             margin-bottom: 3vmin;
             letter-spacing: 0.05em;
             text-align: center;
@@ -49,13 +44,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Reduced gap */
             gap: 3vmin;
             width: 80%;
         }
 
         .token-image {
-            /* Reduced from 30vmin to 18vmin */
             width: 18vmin;
             height: 18vmin;
             background-color: #4a9c2d;
@@ -75,7 +68,6 @@
 
         .arrow-icon {
             color: white;
-            /* Reduced from 20vmin to 10vmin */
             font-size: 10vmin;
             font-weight: bold;
         }
@@ -92,28 +84,90 @@
             align-items: center;
             gap: 1vmin;
             color: #b0b3b8;
-            /* Reduced font size */
             font-size: 2.2vmin;
         }
 
         .pepe-icon {
-            /* Reduced icon size */
             width: 4vmin;
             height: 4vmin;
             border-radius: 50%;
         }
 
+        /* --- NEW COPY BUTTON STYLES --- */
+        .address-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5vmin;
+            background-color: #2a2b35;
+            padding: 0.4vmin 1vmin;
+            border-radius: 0.5vmin;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative; /* For tooltip positioning */
+            border: 1px solid #3a3b45;
+        }
+
+        .address-pill:hover {
+            background-color: #3a3b45;
+        }
+
         .username {
             color: #ffffff;
             font-weight: bold;
-            background-color: transparent;
-            padding: 0;
+            font-family: monospace; /* Monospace looks better for addresses */
+            font-size: 2vmin;
         }
+
+        .copy-icon-svg {
+            width: 2vmin;
+            height: 2vmin;
+            fill: #b0b3b8;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            background-color: #4a9c2d;
+            color: #fff;
+            text-align: center;
+            border-radius: 0.5vmin;
+            padding: 0.5vmin 1vmin;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the button */
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 1.8vmin;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -0.5vmin;
+            border-width: 0.5vmin;
+            border-style: solid;
+            border-color: #4a9c2d transparent transparent transparent;
+        }
+
+        .address-pill:active .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .address-pill.copied .tooltip {
+             visibility: visible;
+            opacity: 1;
+        }
+        /* --------------------------- */
 
         .market-cap-line {
             color: #4a9c2d;
             font-weight: bold;
-            /* Reduced font size */
             font-size: 3vmin;
         }
         
@@ -138,7 +192,6 @@
         }
 
         .token-name-line {
-            /* Reduced from 6vmin to 4vmin */
             font-size: 4vmin;
             font-weight: bold;
             margin-top: 0.5vmin;
@@ -155,7 +208,6 @@
         .progress-container {
             margin-top: 1vmin;
             width: 100%;
-            /* Limit width slightly for cleaner look */
             max-width: 40vmin;
         }
 
@@ -176,7 +228,6 @@
 
         .progress-bar-bg {
             width: 100%;
-            /* Reduced height */
             height: 1.8vmin;
             background-color: #2a2b35;
             border-radius: 1vmin;
@@ -226,7 +277,6 @@
             text-shadow: 0 0 0.5vmin rgba(255, 215, 0, 0.5);
         }
         
-        /* Hide utilities */
         #tokenMint, #statusLog, #solPriceDisplay, #priceDisplay { display: none; }
     </style>
 </head>
@@ -242,7 +292,13 @@
             <div class="creator-line">
                 Created by 
                 <img src="" alt="Creator" class="pepe-icon"> 
-                <span class="username">...</span>
+                <div class="address-pill" onclick="copyAddress()">
+                    <span class="username" id="creatorAddressDisplay">...</span>
+                    <svg class="copy-icon-svg" viewBox="0 0 24 24">
+                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                    </svg>
+                    <span class="tooltip" id="copyTooltip">Copied</span>
+                </div>
             </div>
             <div class="market-cap-line">
                 market cap: <span id="mcapDisplay" class="market-cap-value">Loading...</span> <span class="badge">[badge: 👑]</span>
@@ -297,11 +353,16 @@
         const PUMP_PROGRAM = new PublicKey("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P");
         
         // Bonding curve constants (with 6 decimals)
-        const INITIAL_REAL_TOKEN_RESERVES = 793_100_000_000_000n; // 793.1M tokens (with 6 decimals)
+        const INITIAL_REAL_TOKEN_RESERVES = 793_100_000_000_000n; 
 
-        // --- Apply Settings ---
+        // --- Apply Settings & Format Address ---
         document.getElementById('tokenMint').value = SETTINGS.tokenMint;
-        document.querySelector('.username').innerText = SETTINGS.creatorName;
+        
+        // NEW: Format address to "Start...End"
+        const fullAddress = SETTINGS.creatorName;
+        const truncatedAddress = fullAddress.slice(0, 6) + '...' + fullAddress.slice(-4);
+        document.getElementById('creatorAddressDisplay').innerText = truncatedAddress;
+
         document.querySelector('.token-name-line').innerHTML = `${SETTINGS.tokenName} <span class="ticker">[ticker: ${SETTINGS.ticker}]</span>`;
         document.querySelector('.replies-value').innerText = SETTINGS.repliesCount;
         document.querySelector('.pepe-icon').src = SETTINGS.creatorImage;
@@ -313,9 +374,24 @@
             imgContainer.style.border = "none";
         }
 
+        // --- NEW: Copy Functionality ---
+        function copyAddress() {
+            navigator.clipboard.writeText(SETTINGS.creatorName).then(() => {
+                const pill = document.querySelector('.address-pill');
+                pill.classList.add('copied');
+                
+                // Remove the class after animation to allow re-triggering
+                setTimeout(() => {
+                    pill.classList.remove('copied');
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
         // --- Data Logic ---
         const connection = new Connection(SETTINGS.rpcUrl.includes("YOUR") ? "https://api.mainnet-beta.solana.com" : SETTINGS.rpcUrl, "confirmed");
-        let solPrice = 200.0; // Updated fallback price
+        let solPrice = 200.0; 
 
         async function fetchSolPrice() {
             try {
@@ -323,7 +399,6 @@
                 const data = await response.json();
                 if (data && data.solana && data.solana.usd) {
                     solPrice = data.solana.usd;
-                    console.log('SOL Price updated:', solPrice);
                 }
             } catch (err) { 
                 console.log("Using fallback SOL price:", solPrice); 
@@ -357,7 +432,6 @@
                 const realTokenReserves = view.getBigUint64(24, true);
                 const realSolReserves = view.getBigUint64(32, true);
                 
-                // Check if bonding curve is complete (byte offset 48, bool)
                 const isComplete = view.getUint8(48) === 1;
                 
                 if (isComplete || virtualTokenReserves === 0n || realTokenReserves === 0n) {
@@ -383,19 +457,6 @@
                 const priceInUsd = priceInSol * solPrice;
                 const marketCap = priceInUsd * 1_000_000_000; 
 
-                // Debug logging
-                console.log('Market Cap Debug:', {
-                    virtualTokenReserves: vToken.toFixed(2),
-                    virtualSolReserves: vSol.toFixed(4),
-                    priceInSol: priceInSol.toFixed(10),
-                    priceInUsd: priceInUsd.toFixed(10),
-                    solPrice: solPrice,
-                    marketCap: marketCap.toFixed(2),
-                    currentSOL: (Number(realSolReserves) / 1_000_000_000).toFixed(3),
-                    solNeeded: (85 - Number(realSolReserves) / 1_000_000_000).toFixed(3),
-                    dollarToGraduate: ((85 - Number(realSolReserves) / 1_000_000_000) * solPrice).toFixed(2)
-                });
-
                 let formattedMcap = "";
                 if (marketCap >= 1_000_000_000) formattedMcap = (marketCap / 1_000_000_000).toFixed(2) + "B";
                 else if (marketCap >= 1_000_000) formattedMcap = (marketCap / 1_000_000).toFixed(2) + "M";
@@ -404,8 +465,7 @@
                 
                 mcapDisplay.innerText = formattedMcap;
 
-                // Calculate bonding curve progress (GitHub gist formula)
-                // Formula: progress = 1 - (realTokenReserves / INITIAL_REAL_TOKEN_RESERVES)
+                // Calculate bonding curve progress
                 const bondingProgress = realTokenReserves >= INITIAL_REAL_TOKEN_RESERVES ? 0 : 
                     (1 - (Number(realTokenReserves * 10000n / INITIAL_REAL_TOKEN_RESERVES) / 10000));
                 const percentage = bondingProgress * 100;
@@ -413,10 +473,7 @@
                 progressBar.style.width = percentage + "%";
                 progressPercent.innerText = percentage.toFixed(1) + "%";
                 
-                // Calculate $ to graduate based on market cap needed to complete bonding curve
-                // Graduation happens when bonding curve completes (all 793.1M tokens sold)
-                // This happens at approximately 85 SOL raised, which at completion gives ~$90k market cap
-                const GRADUATION_MARKET_CAP = 90000; // $90k market cap at graduation
+                const GRADUATION_MARKET_CAP = 90000; 
                 const dollarToGraduate = Math.max(GRADUATION_MARKET_CAP - marketCap, 0);
                 
                 const currentSol = Number(realSolReserves) / 1_000_000_000;
