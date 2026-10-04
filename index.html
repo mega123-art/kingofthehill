@@ -330,7 +330,7 @@
         // 👇 CONFIGURATION
         // ==================================================================
         const SETTINGS = {
-            tokenMint: "7gjkqLhkdhLyiPmZfo5vuR3DpwsAxDmxQqjayNMZpump",
+            tokenMint: "ufitjDayJ6T1FQTbEdU14aNCtG8F65nyTuh2FQBKoTh",
             
             // Your Helius/Alchemy URL (Required for blockchain data)
             rpcUrl: "https://mainnet.helius-rpc.com/?api-key=9a8da134-4626-4efc-99ad-ada51ac9e844",
@@ -338,7 +338,7 @@
             tokenName: "King Of the Hill",
             ticker: "KOTH",
             
-            creatorName: "7wKVsQqDDcnQopX1Hmy6vXmS4ekxFmVCeCjAgiVYzCU5",
+            creatorName: "GuRQtD1G7HPJZr8YrDH7nFhHMNaNu3yNMf4DvkUe4JHg",
             repliesCount: "43", 
 
             tokenImage: "image.png",
@@ -386,21 +386,42 @@
 
         // --- Data Logic ---
         const connection = new Connection(SETTINGS.rpcUrl.includes("YOUR") ? "https://api.mainnet-beta.solana.com" : SETTINGS.rpcUrl, "confirmed");
-        let solPrice = 200.0; // Fallback
+        let solPrice = 150.0; // Fallback, only used if every price source fails
+
+        const PRICE_SOURCES = [
+            async () => (await (await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd")).json()).solana.usd,
+            async () => parseFloat((await (await fetch("https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT")).json()).price)
+        ];
 
         async function fetchSolPrice() {
-            try {
-                const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
-                const data = await response.json();
-                if (data && data.solana && data.solana.usd) {
-                    solPrice = data.solana.usd;
-                }
-            } catch (err) { 
-                console.log("Using fallback SOL price:", solPrice); 
+            for (const source of PRICE_SOURCES) {
+                try {
+                    const price = await source();
+                    if (Number.isFinite(price) && price > 0) { solPrice = price; return; }
+                } catch (err) { /* try next source */ }
             }
+            console.log("Using last known SOL price:", solPrice);
         }
 
+        function showMigrated() {
+            document.getElementById("mcapDisplay").innerText = "Migrated";
+            document.getElementById("progressBar").style.width = "100%";
+            document.getElementById("progressPercent").innerHTML = '<span class="migrated-badge">✓ MIGRATED</span>';
+            document.getElementById("progressStatus").innerHTML = '<span class="migrated-badge">Token has graduated to PumpSwap! 🚀</span>';
+        }
+
+        function showError(msg) {
+            document.getElementById("mcapDisplay").innerText = "Error";
+            document.getElementById("progressBar").style.width = "0%";
+            document.getElementById("progressPercent").innerText = "--";
+            document.getElementById("progressStatus").innerText = msg;
+        }
+
+        let updating = false;
         async function updateMarketCap() {
+            if (updating) return; // skip tick if previous request is still in flight
+            updating = true;
+
             const mcapDisplay = document.getElementById("mcapDisplay");
             const progressBar = document.getElementById("progressBar");
             const progressPercent = document.getElementById("progressPercent");
@@ -412,82 +433,70 @@
                 const [bondingCurvePda] = await PublicKey.findProgramAddress([seed, mintPubkey.toBytes()], PUMP_PROGRAM);
                 const accountInfo = await connection.getAccountInfo(bondingCurvePda);
 
-                if (!accountInfo) { 
-                    mcapDisplay.innerText = "Migrated";
-                    progressBar.style.width = "100%";
-                    progressPercent.innerHTML = '<span class="migrated-badge">✓ MIGRATED</span>';
-                    progressStatus.innerHTML = '<span class="migrated-badge">Token has graduated to PumpSwap! 🚀</span>';
+                if (!accountInfo) {
+                    // No curve account: migrated only if the mint itself exists
+                    const mintInfo = await connection.getAccountInfo(mintPubkey);
+                    if (!mintInfo) { showError("Token mint not found"); return; }
+                    showMigrated();
                     return;
                 }
-                
+
                 const buffer = accountInfo.data;
                 const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
                 const virtualTokenReserves = view.getBigUint64(8, true);
                 const virtualSolReserves = view.getBigUint64(16, true);
                 const realTokenReserves = view.getBigUint64(24, true);
                 const realSolReserves = view.getBigUint64(32, true);
-                
                 const isComplete = view.getUint8(48) === 1;
-                
+
                 if (isComplete || virtualTokenReserves === 0n || realTokenReserves === 0n) {
-                    mcapDisplay.innerText = "Migrated";
-                    progressBar.style.width = "100%";
-                    progressPercent.innerHTML = '<span class="migrated-badge">✓ MIGRATED</span>';
-                    progressStatus.innerHTML = '<span class="migrated-badge">Token has graduated to PumpSwap! 🚀</span>';
-                    return;
-                }
-                
-                if (virtualTokenReserves === 0n) { 
-                    mcapDisplay.innerText = "Migrated";
-                    progressBar.style.width = "100%";
-                    progressPercent.innerHTML = '<span class="migrated-badge">✓ MIGRATED</span>';
-                    progressStatus.innerHTML = '<span class="migrated-badge">Token has graduated to Raydium! 🚀</span>';
+                    showMigrated();
                     return;
                 }
 
                 // Calculate market cap
                 const vToken = Number(virtualTokenReserves) / 1_000_000;
                 const vSol = Number(virtualSolReserves) / 1_000_000_000;
-                const priceInSol = vSol / vToken;
-                const priceInUsd = priceInSol * solPrice;
-                const marketCap = priceInUsd * 1_000_000_000; 
+                const priceInUsd = (vSol / vToken) * solPrice;
+                const marketCap = priceInUsd * 1_000_000_000;
 
                 let formattedMcap = "";
                 if (marketCap >= 1_000_000_000) formattedMcap = (marketCap / 1_000_000_000).toFixed(2) + "B";
                 else if (marketCap >= 1_000_000) formattedMcap = (marketCap / 1_000_000).toFixed(2) + "M";
                 else if (marketCap >= 1_000) formattedMcap = (marketCap / 1_000).toFixed(2) + "K";
                 else formattedMcap = marketCap.toFixed(2);
-                
+
                 mcapDisplay.innerText = formattedMcap;
 
                 // Calculate bonding curve progress
-                const bondingProgress = realTokenReserves >= INITIAL_REAL_TOKEN_RESERVES ? 0 : 
+                const bondingProgress = realTokenReserves >= INITIAL_REAL_TOKEN_RESERVES ? 0 :
                     (1 - (Number(realTokenReserves * 10000n / INITIAL_REAL_TOKEN_RESERVES) / 10000));
                 const percentage = bondingProgress * 100;
-                
+
                 progressBar.style.width = percentage + "%";
                 progressPercent.innerText = percentage.toFixed(1) + "%";
-                
-                // === CORRECTED GRADUATION TARGET ===
-                // Pump.fun graduation market cap is typically around $60k - $70k (depending on SOL price).
-                // Previously this was 90,000, which caused the mismatch. 65,000 is much closer to live data.
-                const GRADUATION_MARKET_CAP = 65000; 
 
-                const dollarToGraduate = Math.max(GRADUATION_MARKET_CAP - marketCap, 0);
-                
+                // Graduation = all real tokens sold. Constant product (k = vSol * vToken)
+                // gives the final reserves, so this works for any curve parameters.
+                const finalVToken = vToken - Number(realTokenReserves) / 1_000_000;
+                const finalVSol = (vSol * vToken) / finalVToken;
+                const graduationMcap = (finalVSol / finalVToken) * 1_000_000_000 * solPrice;
+                const dollarToGraduate = Math.max(graduationMcap - marketCap, 0);
+                const solToGraduate = finalVSol - vSol;
                 const currentSol = Number(realSolReserves) / 1_000_000_000;
-                progressStatus.innerText = `${currentSol.toFixed(3)} SOL in bonding curve • $${Math.floor(dollarToGraduate).toLocaleString('en-US')} to graduate`;
+                progressStatus.innerText = `${currentSol.toFixed(3)} / ${(currentSol + solToGraduate).toFixed(3)} SOL in bonding curve • $${Math.floor(dollarToGraduate).toLocaleString('en-US')} to graduate`;
 
-            } catch (err) { 
-                console.error(err); 
-                mcapDisplay.innerText = "Error";
-                progressStatus.innerText = "Unable to load progress data";
+            } catch (err) {
+                console.error(err);
+                showError("Unable to load progress data");
+            } finally {
+                updating = false;
             }
         }
 
-        fetchSolPrice();
-        updateMarketCap();
-        setInterval(updateMarketCap, 1000);
+        // Fetch SOL price first so the initial render doesn't use the fallback
+        fetchSolPrice().finally(updateMarketCap);
+        setInterval(updateMarketCap, 4000);
         setInterval(fetchSolPrice, 60000);
     </script>
 </body>
